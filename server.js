@@ -5,6 +5,7 @@
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
+const nodemailer = require('nodemailer'); // 🌟 CORRECCIÓN: ¡El cartero se presenta al principio!
 
 const app = express();
 const puerto = process.env.PORT || 3000;
@@ -40,7 +41,7 @@ const db = new sqlite3.Database('./salon.db', (err) => {
       // 🌟 MAGIA: Llenar los servicios si la tabla está vacía
       db.get("SELECT COUNT(*) AS cantidad FROM servicios", (err, fila) => {
         if (fila.cantidad === 0) {
-          console.log("Preparando los hermosos servicios por primera vez... ");
+          console.log("Preparando los hermosos servicios por primera vez... 💅");
           const insertar = db.prepare("INSERT INTO servicios (nombre, descripcion) VALUES (?, ?)");
           
           insertar.run("Manicure", "Esmaltado tradicional y soft gel.");
@@ -53,7 +54,7 @@ const db = new sqlite3.Database('./salon.db', (err) => {
           insertar.run("Cejas", "Perfilado profesional.");
           
           insertar.finalize();
-          console.log("¡Servicios guardados en la base de datos! ");
+          console.log("¡Servicios guardados en la base de datos! ✨");
         }
       });
     });
@@ -66,7 +67,7 @@ const db = new sqlite3.Database('./salon.db', (err) => {
 
 // Ruta para ver si el servidor está vivo
 app.get('/', (req, res) => {
-  res.send('¡Hola! El servidor está funcionando perfecto');
+  res.send('¡Hola! El servidor está funcionando perfecto ✨');
 });
 
 // 🌟 RUTA NUEVA: Envía los servicios a su página web
@@ -79,56 +80,6 @@ app.get('/api/servicios', (req, res) => {
     // Enviamos las filas (los servicios) a la página
     res.json(filas);
   });
-});
-
-// 🌟 RUTA NUEVA: Recibe la reserva, la guarda y envía el correo!
-app.post('/api/reservas', (req, res) => {
-  const { nombre, correo, telefono, servicio_id, fecha, hora } = req.body;
-
-  // 1. Guardamos la reserva en la Base de Datos (gaveta)
-  const insertar = db.prepare(`INSERT INTO reservas (nombre_cliente, correo, telefono, servicio_id, fecha, hora) VALUES (?, ?, ?, ?, ?, ?)`);
-  
-  insertar.run([nombre, correo, telefono, servicio_id, fecha, hora], function(err) {
-    if (err) {
-      return res.status(500).json({ error: "Error al guardar en base de datos" });
-    }
-
-    // 2. Configuramos el Cartero (Nodemailer)
-    let transporter = nodemailer.createTransport({
-      service: 'gmail', 
-      auth: {
-        user: 'javierypd@gmail.com', // 🌟 ¡CAMBIE ESTO POR SU CORREO!
-        pass:  'mdqp nxbg eicr phdz' // 🌟 ¡CAMBIE ESTO POR SU CONTRASEÑA DE 16 LETRAS!
-      }
-    });
-
-    // 3. Escribimos la carta que le llegará a USTED
-    let mensaje = {
-      from: '"App Entre Chicas" <javierypd@gmail.com>', // 🌟 CAMBIAR
-      to: 'javierypd@gmail.com', // 🌟 CAMBIAR (A dónde llegará el aviso)
-      subject: ' ¡NUEVA RESERVA EN EL SALÓN! ',
-      text: `¡Felicidades! Tienes una nueva reserva.\n\nClienta: ${nombre}\nTeléfono: ${telefono}\nCorreo: ${correo}\nFecha: ${fecha}\nHora: ${hora}\n\n(ID del Servicio: ${servicio_id})`
-    };
-
-    // 4. ¡Enviamos el correo!
-    transporter.sendMail(mensaje, (error, info) => {
-      if (error) {
-        console.log("Error al enviar el correo:", error);
-        return res.json({ mensaje: "Cita guardada en sistema, pero no se pudo enviar el aviso por correo." });
-      } else {
-        console.log("Correo enviado con éxito: " + info.response);
-        return res.json({ mensaje: "¡Cita agendada y correo enviado con éxito!" });
-      }
-    });
-  });
-});
-
-// =========================================================
-// 🚀 3. ENCENDIDO
-// =========================================================
-const nodemailer = require('nodemailer');
-app.listen(puerto, () => {
-  console.log(`¡Servidor escuchando en el puerto! `);
 });
 
 // =========================================================
@@ -166,4 +117,53 @@ app.delete('/api/reservas/:id', (req, res) => {
     }
     res.json({ mensaje: "¡Cita atendida y archivada con éxito!" });
   });
+});
+
+// 🌟 RUTA NUEVA: Recibe la reserva, la guarda y envía el correo!
+app.post('/api/reservas', (req, res) => {
+  const { nombre, correo, telefono, servicio_id, fecha, hora } = req.body;
+
+  // 1. Guardamos la reserva en la Base de Datos (gaveta)
+  const insertar = db.prepare(`INSERT INTO reservas (nombre_cliente, correo, telefono, servicio_id, fecha, hora) VALUES (?, ?, ?, ?, ?, ?)`);
+  
+  insertar.run([nombre, correo, telefono, servicio_id, fecha, hora], function(err) {
+    if (err) {
+      return res.status(500).json({ error: "Error al guardar en base de datos" });
+    }
+
+    // 2. Configuramos el Cartero (Nodemailer)
+    let transporter = nodemailer.createTransport({
+      service: 'gmail', 
+      auth: {
+        user: 'javierypd@gmail.com', // Su correo
+        pass: 'mdqp nxbg eicr phdz' // Su contraseña de aplicación
+      }
+    });
+
+    // 3. Escribimos la carta que le llegará a USTED
+    let mensaje = {
+      from: '"App Entre Chicas" <javierypd@gmail.com>', 
+      to: 'javierypd@gmail.com', 
+      subject: '💅 ¡NUEVA RESERVA EN EL SALÓN! 💅',
+      text: `¡Felicidades! Tienes una nueva reserva.\n\nClienta: ${nombre}\nTeléfono: ${telefono}\nCorreo: ${correo}\nFecha: ${fecha}\nHora: ${hora}\n\n(ID del Servicio: ${servicio_id})`
+    };
+
+    // 4. ¡Enviamos el correo!
+    transporter.sendMail(mensaje, (error, info) => {
+      if (error) {
+        console.log("Error al enviar el correo:", error);
+        return res.json({ mensaje: "Cita guardada en sistema, pero no se pudo enviar el aviso por correo." });
+      } else {
+        console.log("Correo enviado con éxito: " + info.response);
+        return res.json({ mensaje: "¡Cita agendada y correo enviado con éxito!" });
+      }
+    });
+  });
+});
+
+// =========================================================
+// 🚀 3. ENCENDIDO (¡Esto siempre debe ir al puro final!)
+// =========================================================
+app.listen(puerto, () => {
+  console.log(`¡Servidor escuchando en el puerto ${puerto}! 🚀`);
 });
