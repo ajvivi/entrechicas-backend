@@ -5,7 +5,7 @@
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
-const nodemailer = require('nodemailer'); // 🌟 CORRECCIÓN: ¡El cartero se presenta al principio!
+const nodemailer = require('nodemailer'); 
 
 const app = express();
 const puerto = process.env.PORT || 3000;
@@ -41,7 +41,7 @@ const db = new sqlite3.Database('./salon.db', (err) => {
       // 🌟 MAGIA: Llenar los servicios si la tabla está vacía
       db.get("SELECT COUNT(*) AS cantidad FROM servicios", (err, fila) => {
         if (fila.cantidad === 0) {
-          console.log("Preparando los hermosos servicios por primera vez... 💅");
+          console.log("Preparando los hermosos servicios por primera vez... ");
           const insertar = db.prepare("INSERT INTO servicios (nombre, descripcion) VALUES (?, ?)");
           
           insertar.run("Manicure", "Esmaltado tradicional y soft gel.");
@@ -86,7 +86,6 @@ app.get('/api/servicios', (req, res) => {
 // 🕵️‍♂️ RUTA SECRETA: Enviar reservas al panel de administración
 // =========================================================
 app.get('/api/reservas-secretas', (req, res) => {
-  // 🌟 EL TRUCO JOIN: Unimos la tabla reservas con la tabla servicios
   const consultaSQL = `
     SELECT reservas.*, servicios.nombre AS nombre_servicio 
     FROM reservas 
@@ -107,10 +106,8 @@ app.get('/api/reservas-secretas', (req, res) => {
 // 🗑️ RUTA NUEVA: Marcar cita como atendida (Eliminarla)
 // =========================================================
 app.delete('/api/reservas/:id', (req, res) => {
-  // Atrapamos el ID de la reserva que queremos borrar
   const idReserva = req.params.id; 
   
-  // Le damos la orden a la base de datos
   db.run("DELETE FROM reservas WHERE id = ?", [idReserva], function(err) {
     if (err) {
       return res.status(500).json({ error: "Error al borrar la cita" });
@@ -123,7 +120,7 @@ app.delete('/api/reservas/:id', (req, res) => {
 app.post('/api/reservas', (req, res) => {
   const { nombre, correo, telefono, servicio_id, fecha, hora } = req.body;
 
-  // 1. Guardamos la reserva en la Base de Datos (gaveta)
+  // 1. Guardamos la reserva en la Base de Datos
   const insertar = db.prepare(`INSERT INTO reservas (nombre_cliente, correo, telefono, servicio_id, fecha, hora) VALUES (?, ?, ?, ?, ?, ?)`);
   
   insertar.run([nombre, correo, telefono, servicio_id, fecha, hora], function(err) {
@@ -131,20 +128,20 @@ app.post('/api/reservas', (req, res) => {
       return res.status(500).json({ error: "Error al guardar en base de datos" });
     }
 
-    // 2. Configuramos el Cartero (Nodemailer)
+    // 2. Configuramos el Cartero con Variables de Entorno Seguras 🔐
     let transporter = nodemailer.createTransport({
       service: 'gmail', 
       auth: {
-        user: 'javierypd@gmail.com', // Su correo
-        pass: 'mdqpnxbgeicrphdz' // Su contraseña de aplicación
+        user: process.env.EMAIL_USER, // Lee su correo de Render
+        pass: process.env.EMAIL_PASS  // Lee su contraseña de Render
       }
     });
 
-    // 3. Escribimos la carta que le llegará a USTED
+    // 3. Escribimos la carta que le llegará
     let mensaje = {
-      from: '"App Entre Chicas" <javierypd@gmail.com>', 
-      to: 'javierypd@gmail.com', 
-      subject: '💅 ¡NUEVA RESERVA EN EL SALÓN! 💅',
+      from: `"App Entre Chicas" <${process.env.EMAIL_USER}>`, 
+      to: process.env.EMAIL_USER, 
+      subject: '💅 ¡NUEVA RESERVA EN EL SALÓN!',
       text: `¡Felicidades! Tienes una nueva reserva.\n\nClienta: ${nombre}\nTeléfono: ${telefono}\nCorreo: ${correo}\nFecha: ${fecha}\nHora: ${hora}\n\n(ID del Servicio: ${servicio_id})`
     };
 
@@ -162,8 +159,8 @@ app.post('/api/reservas', (req, res) => {
 });
 
 // =========================================================
-// 🚀 3. ENCENDIDO (¡Esto siempre debe ir al puro final!)
+// 🚀 3. ENCENDIDO
 // =========================================================
 app.listen(puerto, () => {
-  console.log(`¡Servidor escuchando en el puerto ${puerto}! 🚀`);
+  console.log(`¡Servidor escuchando en el puerto ${puerto}! `);
 });
