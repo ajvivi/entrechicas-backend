@@ -1,13 +1,14 @@
 {
   "name": "backend_entrechicas",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend para el salón Entre Chicas",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Javier",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
