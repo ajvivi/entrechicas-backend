@@ -136,7 +136,7 @@ app.post('/api/reservas', (req, res) => {
       service: 'gmail', 
       auth: {
         user: 'javierypd@gmail.com', // Su correo
-        pass: 'mdqp nxbg eicr phdz' // Su contraseña de aplicación
+        pass: 'mdqpnxbgeicrphdz' // Su contraseña de aplicación
       }
     });
 
