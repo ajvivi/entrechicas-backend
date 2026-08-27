@@ -10,19 +10,38 @@ const nodemailer = require('nodemailer');
 const app = express();
 const puerto = process.env.PORT || 3000;
 
-app.use(cors());
+// 🔒 1. CONFIGURACIÓN DE CORS (PERMISOS PARA NETLIFY)
+const origenesPermitidos = [
+  process.env.FRONTEND_URL, // Su URL de Netlify si la guarda en variables de entorno
+  'http://localhost:5500',   // Para pruebas locales
+  'http://127.0.0.1:5500'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Permite conexiones si vienen de Netlify, de pruebas locales o peticiones directas
+    if (!origin || origenesPermitidos.indexOf(origin) !== -1 || origin.includes('netlify.app')) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Mantiene abierto el acceso para evitar bloqueos en desarrollo
+    }
+  },
+  methods: ['GET', 'POST', 'DELETE', 'PUT'],
+  credentials: true
+}));
+
 app.use(express.json()); 
 
 // =========================================================
-// 🗄️ 1. BASE DE DATOS Y CARGA DE SERVICIOS
+// 🗄️ 2. BASE DE DATOS Y CARGA DE SERVICIOS
 // =========================================================
 const db = new sqlite3.Database('./salon.db', (err) => {
   if (err) {
-    console.error('Ups, error:', err);
+    console.error('Ups, error al conectar base de datos:', err);
   } else {
-    console.log('¡Base de datos conectada!');
+    console.log('¡Base de datos conectada con éxito! ');
     
-    // Crear gavetas
+    // Crear tablas
     db.run(`CREATE TABLE IF NOT EXISTS servicios (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nombre TEXT NOT NULL,
@@ -38,9 +57,9 @@ const db = new sqlite3.Database('./salon.db', (err) => {
       fecha TEXT NOT NULL,
       hora TEXT NOT NULL
     )`, () => {
-      // 🌟 MAGIA: Llenar los servicios si la tabla está vacía
+      // 🌟 Llenar los servicios si la tabla está vacía
       db.get("SELECT COUNT(*) AS cantidad FROM servicios", (err, fila) => {
-        if (fila.cantidad === 0) {
+        if (fila && fila.cantidad === 0) {
           console.log("Preparando los hermosos servicios por primera vez... ");
           const insertar = db.prepare("INSERT INTO servicios (nombre, descripcion) VALUES (?, ?)");
           
@@ -54,7 +73,7 @@ const db = new sqlite3.Database('./salon.db', (err) => {
           insertar.run("Cejas", "Perfilado profesional.");
           
           insertar.finalize();
-          console.log("¡Servicios guardados en la base de datos! ✨");
+          console.log("¡Servicios guardados en la base de datos! ");
         }
       });
     });
@@ -62,22 +81,21 @@ const db = new sqlite3.Database('./salon.db', (err) => {
 });
 
 // =========================================================
-// 🌉 2. RUTAS DE COMUNICACIÓN (API)
+// 🌉 3. RUTAS DE COMUNICACIÓN (API)
 // =========================================================
 
-// Ruta para ver si el servidor está vivo
+// Ruta para comprobar el estado del servidor
 app.get('/', (req, res) => {
-  res.send('¡Hola! El servidor está funcionando perfecto ✨');
+  res.send('¡Hola! El servidor de Entre Chicas está funcionando perfecto ');
 });
 
-// 🌟 RUTA NUEVA: Envía los servicios a su página web
+// 🌟 RUTA: Envía los servicios a su página web
 app.get('/api/servicios', (req, res) => {
   db.all("SELECT * FROM servicios", [], (err, filas) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    // Enviamos las filas (los servicios) a la página
     res.json(filas);
   });
 });
@@ -103,7 +121,7 @@ app.get('/api/reservas-secretas', (req, res) => {
 });
 
 // =========================================================
-// 🗑️ RUTA NUEVA: Marcar cita como atendida (Eliminarla)
+// 🗑️ RUTA: Marcar cita como atendida (Eliminarla)
 // =========================================================
 app.delete('/api/reservas/:id', (req, res) => {
   const idReserva = req.params.id; 
@@ -116,40 +134,43 @@ app.delete('/api/reservas/:id', (req, res) => {
   });
 });
 
-// 🌟 RUTA NUEVA: Recibe la reserva, la guarda y envía el correo!
+// =========================================================
+// 📩 RUTA: Recibe la reserva, la guarda y envía el correo
+// =========================================================
 app.post('/api/reservas', (req, res) => {
   const { nombre, correo, telefono, servicio_id, fecha, hora } = req.body;
 
-  // 1. Guardamos la reserva en la Base de Datos
-  const insertar = db.prepare(`INSERT INTO reservas (nombre_cliente, correo, telefono, servicio_id, fecha, hora) VALUES (?, ?, ?, ?, ?, ?)`);
+  // 1. Guardamos la reserva directamente en la Base de Datos
+  const queryInsertar = `INSERT INTO reservas (nombre_cliente, correo, telefono, servicio_id, fecha, hora) VALUES (?, ?, ?, ?, ?, ?)`;
   
-  insertar.run([nombre, correo, telefono, servicio_id, fecha, hora], function(err) {
+  db.run(queryInsertar, [nombre, correo, telefono, servicio_id, fecha, hora], function(err) {
     if (err) {
-      return res.status(500).json({ error: "Error al guardar en base de datos" });
+      console.error("Error al guardar reserva:", err);
+      return res.status(500).json({ error: "Error al guardar en la base de datos" });
     }
 
-    // 2. Configuramos el Cartero con Variables de Entorno Seguras 🔐
+    // 2. Configuramos el Cartero (Nodemailer) 🔐
     let transporter = nodemailer.createTransport({
       service: 'gmail', 
       auth: {
-        user: process.env.EMAIL_USER, // Lee su correo de Render
-        pass: process.env.EMAIL_PASS  // Lee su contraseña de Render
+        user: process.env.EMAIL_USER, // Su correo desde las variables de Render
+        pass: process.env.EMAIL_PASS  // Su contraseña de aplicación desde Render
       }
     });
 
-    // 3. Escribimos la carta que le llegará
+    // 3. Escribimos el mensaje que le llegará a usted
     let mensaje = {
       from: `"App Entre Chicas" <${process.env.EMAIL_USER}>`, 
       to: process.env.EMAIL_USER, 
-      subject: '💅 ¡NUEVA RESERVA EN EL SALÓN!',
+      subject: '¡NUEVA RESERVA EN EL SALÓN!',
       text: `¡Felicidades! Tienes una nueva reserva.\n\nClienta: ${nombre}\nTeléfono: ${telefono}\nCorreo: ${correo}\nFecha: ${fecha}\nHora: ${hora}\n\n(ID del Servicio: ${servicio_id})`
     };
 
-    // 4. ¡Enviamos el correo!
+    // 4. Enviamos el correo
     transporter.sendMail(mensaje, (error, info) => {
       if (error) {
         console.log("Error al enviar el correo:", error);
-        return res.json({ mensaje: "Cita guardada en sistema, pero no se pudo enviar el aviso por correo." });
+        return res.json({ mensaje: "Cita guardada en el sistema, pero no se pudo enviar el aviso por correo." });
       } else {
         console.log("Correo enviado con éxito: " + info.response);
         return res.json({ mensaje: "¡Cita agendada y correo enviado con éxito!" });
@@ -159,7 +180,7 @@ app.post('/api/reservas', (req, res) => {
 });
 
 // =========================================================
-// 🚀 3. ENCENDIDO
+// 🚀 4. ENCENDIDO DEL SERVIDOR
 // =========================================================
 app.listen(puerto, () => {
   console.log(`¡Servidor escuchando en el puerto ${puerto}! `);
