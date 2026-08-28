@@ -21,6 +21,30 @@ const db = getFirestore(app);
 // 🌸 INICIO DE LAS ANIMACIONES Y EVENTOS DE LA PÁGINA
 // =========================================================
 document.addEventListener("DOMContentLoaded", () => {
+  const cajitaServicios = document.getElementById('servicioSelect') || document.getElementById('servicio');
+  
+  if (cajitaServicios) {
+    const listaServicios = [
+      "Manicure y Pedicure",
+      "Peluquería y Peinados",
+      "Depilación",
+      "Tratamientos Faciales",
+      "Lifting de Pestañas",
+      "Diseño de Cejas",
+      "Maquillaje Profesional"
+    ];
+
+    // Limpiamos el texto de "Cargando..."
+    cajitaServicios.innerHTML = '<option value="" disabled selected>Seleccione un servicio...</option>';
+
+    // Agregamos los servicios uno por uno
+    listaServicios.forEach(servicio => {
+      const opcion = document.createElement('option');
+      opcion.value = servicio;
+      opcion.textContent = servicio;
+      cajitaServicios.appendChild(opcion);
+    });
+  }
   
   // =========================================================
   // 1. EFECTO DE MOVIMIENTO DE LA IMAGEN 📸
