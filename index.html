@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entre Chicas - Salón de Belleza</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <video id="videoFondo" class="video-fondo-pantalla" autoplay loop muted playsinline>
+    <source src="video.mp4" type="video/mp4">
+  </video>
+  
+  
+  <div class="pantalla-fondo">
+    
+    <main class="tarjeta-principal" id="contenedorInteractiva">
+      
+      <nav class="navegacion">
+        <div class="logo">Entre Chicas</div>
+        <ul class="enlaces">
+          <li><a href="#servicios">Servicios</a></li>
+          <li><a href="#nosotros">Nosotros</a></li>
+          <li><a href="#">Testimonios</a></li>
+        </ul>
+        
+        <a href="#" id="btnAbrirModal" class="btn-reserva" style="text-decoration: none;">Agendar Cita</a>
+      </nav>
+
+      <div class="contenido-hero">
+        
+        <div class="texto-izquierdo">
+          <h1 class="titulo-elegante">Despierta tu<br>belleza natural</h1>
+          <p>En <b>Entre Chicas</b> te ofrecemos una experiencia integral para tu cuidado personal. Déjate mimar por nuestras expertas.</p>
+          <a href="#servicios" class="btn-accion" style="text-decoration: none; display: inline-block;">Ver Catálogo</a>
+        </div>
+
+        <div class="centro-imagen"></div>
+
+        <div class="datos-derechos">
+          <div class="dato">
+            <h3>100%</h3>
+            <p>Atención personalizada</p>
+          </div>
+          <div class="dato">
+            <h3>+50</h3>
+            <p>Servicios de belleza</p>
+          </div>
+          <div class="dato">
+            <h3>Premium</h3>
+            <p>Productos de alta calidad</p>
+          </div>
+        </div>
+      </div>
+      
+      <button id="btnAudio" class="btn-sonido">Activar Sonido</button>
+
+    </main> 
+  </div> <section id="servicios" class="seccion-servicios">
+    <div class="tarjeta-servicios-grande">
+  
+      <div class="lado-foto">
+        <img src="foto1.png" alt="Tratamiento Skincare" class="foto-skincare">
+      </div>
+  
+      <div class="lado-contenido">
+        <h2 class="titulo-dentro-tarjeta titulo-elegante">Nuestros Servicios</h2>
+        <p>No prometemos perfección, prometemos cuidado consciente. Descubre nuestros tratamientos personalizados para
+          resaltar la luz natural de tu piel, combinando tecnología y masajes relajantes.</p>
+  
+        <ul class="lista-servicios-elegante">
+            <li>
+              <b>Manicure</b> Esmaltado tradicional y soft gel.
+              <span class="precio-tag">Precio: $18.000</span>
+            </li>
+            <li>
+              <b>Pedicure</b> Esmaltado permanente y tradicional.
+              <span class="precio-tag">Precio: $22.000</span>
+            </li>
+            <li>
+              <b>Peluquería</b> Cortes, tinturas, alisado, extensiones y peinados.
+              <span class="precio-tag">Precio: $35.000</span>
+            </li>
+            <li>
+              <b>Depilación</b> Cuerpo completo o zona a elección.
+              <span class="precio-tag">Precio: $25.000</span>
+            </li>
+            <li>
+              <b>Faciales</b> Limpieza, hidratación y extracción de puntos.
+              <span class="precio-tag">Precio: $40.000</span>
+            </li>
+            <li>
+              <b>Cosméticos</b> Venta de productos premium.
+              <span class="precio-tag">Precio: $30.000</span>
+            </li>
+            <li>
+              <b>Pestañas</b> Ondulación y extensión.
+              <span class="precio-tag">Precio: $28.000</span>
+            </li>
+            <li>
+              <b>Cejas</b> Perfilado profesional.
+              <span class="precio-tag">Precio: $12.000</span>
+            </li>
+          </ul>
+  
+      </div>
+    </div>
+  </section>
+
+  <section id="nosotros" class="seccion-nosotros">
+    <div class="tarjeta-servicios-grande tarjeta-nosotros-grande">
+      
+      <div class="lado-foto">
+        <img src="trabajadores.jpeg" alt="Detalle Macro Pestañas Entre Chicas Chillán" class="foto-skincare">
+      </div>
+      
+      <div class="lado-contenido">
+        <h2 class="titulo-dentro-tarjeta titulo-elegante">Sobre Nosotros</h2>
+        <p>En <strong>Entre Chicas</strong> somos un equipo apasionado por resaltar tu luz natural. Nuestro objetivo es brindarte un espacio seguro, relajante y exclusivo donde puedas desconectarte del mundo y dejarte mimar.</p>
+        
+        <h3 class="subtitulo-seccion"> Nuestro Equipo</h3>
+        <ul class="lista-texto-simple">
+          <li><b>Javier Palma</b> - Fundador y Administrador</li>
+          <li><b>Camila Valdés</b> - Estilista Principal</li>
+          <li><b>Valentina Soto</b> - Especialista en Skincare</li>
+        </ul>
+
+        <h3 class="subtitulo-seccion">Encuéntranos</h3>
+        <ul class="lista-texto-simple">
+          <li><b>Ubicación:</b> Centro de Chillán, Región de Ñuble, Chile (Región de Ñuble)</li>
+          <li><b>Teléfono / WhatsApp:</b> +56 9 1234 5678</li>
+          <li><b>Correo:</b> contacto@entrechicas.cl</li>
+          <li><b>Horario:</b> Lunes a Sábado, 09:00 a 19:00 hrs.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div id="modalReservas" class="modal-overlay">
+    <div class="modal-contenido">
+      
+      <span class="cerrar-modal" id="btnCerrarModal">&times;</span>
+      
+      <div class="contenedor-formulario">
+        <h2 class="titulo-seccion titulo-elegante">Agendar mi Cita</h2>
+        
+        <form id="formularioReserva">
+          <div class="grupo-input">
+            <label for="nombre">Nombre completo</label>
+            <input type="text" id="nombre" required placeholder="Ej: Camila Pérez">
+          </div>
+          
+          <div class="grupo-input">
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" required placeholder="tu@correo.com">
+          </div>
+          
+          <div class="grupo-input">
+            <label for="telefono">Teléfono / WhatsApp</label>
+            <input type="tel" id="telefono" required placeholder="+56 9...">
+          </div>
+          
+          <div class="grupo-input">
+            <label for="servicioSelect">Selecciona tu servicio</label>
+            <select id="servicioSelect" required>
+              <option value="" disabled selected>Cargando servicios hermosos...</option>
+            </select>
+          </div>
+          
+          <div class="fila-inputs">
+            <div class="grupo-input">
+              <label for="fecha">Fecha</label>
+              <input type="date" id="fecha" required>
+            </div>
+            <div class="grupo-input">
+              <label for="hora">Hora</label>
+              <input type="time" id="hora" required>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn-reserva-form">Confirmar Reserva</button>
+          <p class="texto-privacidad">Su información, protegida por ley.</p>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+  
+  <script type="module" src="script.js"></script>
+</body>
+</html>
