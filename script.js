@@ -34,10 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
       "Maquillaje Profesional"
     ];
 
-    // Limpiamos el texto de "Cargando..."
     cajitaServicios.innerHTML = '<option value="" disabled selected>Seleccione un servicio...</option>';
 
-    // Agregamos los servicios uno por uno
     listaServicios.forEach(servicio => {
       const opcion = document.createElement('option');
       opcion.value = servicio;
@@ -47,49 +45,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   // =========================================================
-  // 1. EFECTO DE MOVIMIENTO DE LA IMAGEN 📸
-  // =========================================================
-  const contenedor = document.getElementById('contenedorInteractiva');
-  const imagen = document.getElementById('imagenMovil');
-
-  if (contenedor && imagen) {
-    contenedor.addEventListener('mousemove', (evento) => {
-      const rect = contenedor.getBoundingClientRect();
-      const x = evento.clientX - rect.left; 
-      const y = evento.clientY - rect.top;
-      const centroX = rect.width / 2;
-      const centroY = rect.height / 2;
-      
-      let moverX = (x - centroX) / 30;
-      let moverY = (y - centroY) / 30;
-      
-      imagen.style.transform = `translate(${moverX}px, ${moverY}px) scale(1.05)`;
-    });
-
-    contenedor.addEventListener('mouseleave', () => {
-      imagen.style.transition = 'transform 0.5s ease-out';
-      imagen.style.transform = `translate(0px, 0px) scale(1)`;
-    });
-
-    contenedor.addEventListener('mouseenter', () => {
-      imagen.style.transition = 'transform 0.1s ease-out';
-    });
-  }
-
-  // =========================================================
-  // 💌 2. ENVÍO DE RESERVA DIRECTO A GOOGLE FIRESTORE
+  // 💌 ENVÍO DE RESERVA DIRECTO A GOOGLE FIRESTORE
   // =========================================================
   const formularioReserva = document.getElementById('formularioReserva');
   const modal = document.getElementById('modalReservas'); 
 
   if (formularioReserva) {
     formularioReserva.addEventListener('submit', async (e) => {
-      e.preventDefault(); // Evita que la página se recargue
+      e.preventDefault(); 
 
-      // Buscamos el servicio (soportando los dos IDs que tenía en su código)
       const selectServicio = document.getElementById('servicioSelect') || document.getElementById('servicio');
 
-      // Recopilamos los datos de la clienta
       const datosReserva = {
         nombre: document.getElementById('nombre').value,
         correo: document.getElementById('correo').value,
@@ -97,17 +63,15 @@ document.addEventListener("DOMContentLoaded", () => {
         servicio: selectServicio ? selectServicio.value : 'No especificado',
         fecha: document.getElementById('fecha').value,
         hora: document.getElementById('hora').value,
-        fecha_creacion: new Date() // Guarda el momento exacto en que reservó
+        fecha_creacion: new Date() 
       };
 
       try {
-        // 🚀 ¡MAGIA! Guardamos los datos en la colección "reservas" de Firestore
         await addDoc(collection(db, "reservas"), datosReserva);
+        alert(`¡Cita agendada con éxito!\n¡Gracias por confiar en nosotras, ${datosReserva.nombre}! 💖`);
         
-        alert(`¡Cita agendada con éxito!\n¡Gracias por confiar en nosotras, ${datosReserva.nombre}! `);
-        
-        formularioReserva.reset(); // Limpiamos el formulario
-        if (modal) modal.classList.remove('activo'); // Cerramos el modal
+        formularioReserva.reset(); 
+        if (modal) modal.classList.remove('activo'); 
         
       } catch (error) {
         console.error('Ups, error al guardar en Firebase:', error);
@@ -117,27 +81,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =========================================================
-  // 4. CONTROL DE AUDIO DEL VIDEO DE FONDO 🎵
+  // 🎵 CONTROL DE AUDIO DEL VIDEO DE FONDO (VERSIÓN CLÁSICA)
   // =========================================================
-  const videoFondo = document.querySelector('.video-fondo-pantalla');
+  const videoFondo = document.querySelector('.video-fondo-pantalla') || document.getElementById('videoFondo');
   const btnAudio = document.getElementById('btnAudio');
 
   if (videoFondo && btnAudio) {
-    videoFondo.muted = true;
+    videoFondo.muted = true; // Empieza en silencio por reglas del navegador
     
     btnAudio.addEventListener('click', () => {
       if (videoFondo.muted) {
         videoFondo.muted = false;
-        btnAudio.innerHTML = ' Silenciar'; 
+        btnAudio.innerHTML = '🔊 Silenciar'; 
       } else {
         videoFondo.muted = true;
-        btnAudio.innerHTML = ' Activar Sonido';
+        btnAudio.innerHTML = '🔇 Activar Sonido';
       }
     });
   }
   
   // =========================================================
-  // 5. CONTROL DEL MODAL (POP-UP) DE RESERVAS 
+  // 🪟 CONTROL DEL MODAL (POP-UP) DE RESERVAS 
   // =========================================================
   const btnAbrir = document.getElementById('btnAbrirModal');
   const btnCerrar = document.getElementById('btnCerrarModal');
@@ -160,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =========================================================
-  // 🎬 6. EFECTO 3D PREMIUM: MOUSE + SCROLL 🖱️📜✨
+  // 🎬 EFECTO 3D: MOUSE + SCROLL EN EL VIDEO DE FONDO 🖱️📜
   // =========================================================
   let ratonX = 0;
   let scrollY = 0;
@@ -191,52 +155,34 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =========================================================
-  // 🃏 INCLINACIÓN 3D INTERACTIVA EN TARJETA DE SERVICIOS
+  // 🃏 INCLINACIÓN 3D INTERACTIVA EN TARJETAS
   // =========================================================
-  const tarjetaGrande = document.querySelector('.tarjeta-servicios-grande');
+  const tarjetasInteractivas = document.querySelectorAll('.tarjeta-servicios-grande, .tarjeta-nosotros-grande');
 
-  if (tarjetaGrande) {
-    tarjetaGrande.addEventListener('mousemove', (e) => {
-      const rect = tarjetaGrande.getBoundingClientRect();
+  tarjetasInteractivas.forEach(tarjeta => {
+    tarjeta.addEventListener('mousemove', (e) => {
+      const rect = tarjeta.getBoundingClientRect();
       const x = e.clientX - rect.left - rect.width / 2;
       const y = e.clientY - rect.top - rect.height / 2;
 
       const rotarX = (y / rect.height) * -8;
       const rotarY = (x / rect.width) * 8;
 
-      tarjetaGrande.style.transform = `rotateX(${rotarX}deg) rotateY(${rotarY}deg)`;
+      tarjeta.style.transform = `rotateX(${rotarX}deg) rotateY(${rotarY}deg)`;
+      if(tarjeta.classList.contains('tarjeta-nosotros-grande')) {
+         tarjeta.style.boxShadow = `0 30px 60px rgba(0,0,0,0.12)`;
+      }
     });
 
-    tarjetaGrande.addEventListener('mouseleave', () => {
-      tarjetaGrande.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    tarjeta.addEventListener('mouseleave', () => {
+      tarjeta.style.transform = 'rotateX(0deg) rotateY(0deg)';
+      if(tarjeta.classList.contains('tarjeta-nosotros-grande')) {
+         tarjeta.style.boxShadow = `0 20px 50px rgba(0,0,0,0.1)`;
+      }
     });
-  }
+  });
 
-  // =========================================================
-  // 📸 EFECTO 3D Y SCROLL PARALLAX EN "SOBRE NOSOTROS"
-  // =========================================================
-  const tarjetaNosotros = document.querySelector('.tarjeta-nosotros-grande');
   const fotoNosotros = document.querySelector('.tarjeta-nosotros-grande .lado-foto img');
-
-  if (tarjetaNosotros) {
-    tarjetaNosotros.addEventListener('mousemove', (e) => {
-      const rect = tarjetaNosotros.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-
-      const rotarX = (y / rect.height) * -6; 
-      const rotarY = (x / rect.width) * 6;
-
-      tarjetaNosotros.style.transform = `rotateX(${rotarX}deg) rotateY(${rotarY}deg) translateY(-10px)`;
-      tarjetaNosotros.style.boxShadow = `0 30px 60px rgba(0,0,0,0.12)`;
-    });
-
-    tarjetaNosotros.addEventListener('mouseleave', () => {
-      tarjetaNosotros.style.transform = 'rotateX(0deg) rotateY(0deg) translateY(0px)';
-      tarjetaNosotros.style.boxShadow = `0 20px 50px rgba(0,0,0,0.1)`;
-    });
-  }
-
   window.addEventListener('scroll', () => {
     if (fotoNosotros) {
       let scrollActual = window.scrollY;
@@ -244,5 +190,156 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-}); // 🌟 ¡CIERRE FINAL DEL DOMContentLoaded! 🌟
+  // =========================================================
+  // 📸 MOTOR DEL ESCÁNER FACIAL CON INTELIGENCIA ARTIFICIAL 🧠
+  // =========================================================
+  const videoCamara = document.getElementById('video-camara');
+  const mensajeCamara = document.getElementById('mensaje-camara');
+  const btnEncender = document.getElementById('btn-encender');
+  const btnAnalizar = document.getElementById('btn-analizar');
+  const divResultado = document.getElementById('resultado-escaner'); 
 
+  let conexionCamara = null; 
+  let modeloIA = null; 
+
+  const URL_MODELO = "https://teachablemachine.withgoogle.com/models/gKeaTJIRU/";
+
+  async function cargarModelo() {
+    const modelURL = URL_MODELO + "model.json";
+    const metadataURL = URL_MODELO + "metadata.json";
+    try {
+      modeloIA = await tmImage.load(modelURL, metadataURL);
+      console.log("¡Cerebro de Inteligencia Artificial cargado y listo! 🧠✨");
+    } catch (error) {
+      console.error("Error al cargar la IA:", error);
+    }
+  }
+  cargarModelo(); 
+
+  if(btnEncender) {
+    btnEncender.addEventListener('click', async () => {
+      if (!conexionCamara) {
+        try {
+          conexionCamara = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "user" } 
+          });
+          
+          videoCamara.srcObject = conexionCamara;
+          mensajeCamara.style.display = 'none';
+          videoCamara.style.display = 'block';
+          
+          btnEncender.innerText = "🔴 Apagar Cámara";
+          btnEncender.style.backgroundColor = "#e74c3c"; 
+          
+          btnAnalizar.disabled = false;
+          btnAnalizar.style.backgroundColor = "#20a53a"; 
+          btnAnalizar.style.cursor = "pointer";
+
+        } catch (error) {
+          console.error("Error al acceder a la cámara:", error);
+          alert("¡Ups! Necesitamos su permiso para encender la cámara y ver su hermosa piel. 🥺📸");
+        }
+      } else {
+        const pistas = conexionCamara.getTracks();
+        pistas.forEach(pista => pista.stop()); 
+        conexionCamara = null;
+        
+        videoCamara.style.display = 'none';
+        mensajeCamara.style.display = 'block';
+        
+        if(divResultado) divResultado.style.display = 'none'; 
+        
+        btnEncender.innerText = "📷 Encender Cámara";
+        btnEncender.style.backgroundColor = "#6a4c9c";
+        
+        btnAnalizar.disabled = true;
+        btnAnalizar.style.backgroundColor = "#ccc";
+        btnAnalizar.style.cursor = "not-allowed";
+      }
+    });
+  }
+
+  if(btnAnalizar) {
+    btnAnalizar.addEventListener('click', async () => {
+      if (!modeloIA) {
+        alert("La IA aún se está despertando... Espere un segundito y vuelva a intentar. 😴");
+        return;
+      }
+
+      if(divResultado) {
+        divResultado.style.display = "block";
+        divResultado.innerHTML = "Analizando su piel con Inteligencia Artificial... 🤖✨";
+      }
+      btnAnalizar.innerText = "Pensando... ⏳";
+      btnAnalizar.disabled = true;
+
+      try {
+        const predicciones = await modeloIA.predict(videoCamara);
+        
+        let mejorPrediccion = predicciones[0];
+        for (let i = 1; i < predicciones.length; i++) {
+          if (predicciones[i].probability > mejorPrediccion.probability) {
+            mejorPrediccion = predicciones[i];
+          }
+        }
+
+        const nombrePiel = mejorPrediccion.className; 
+        const porcentaje = Math.round(mejorPrediccion.probability * 100);
+
+        let recomendacion = "";
+        
+        if (nombrePiel.toLowerCase().includes("grasa")) {
+          recomendacion = "Recomendamos nuestra <b>Limpieza Facial Profunda Mificante</b> para controlar el brillo y equilibrar su cutis. ✨";
+        } else if (nombrePiel.toLowerCase().includes("seca")) {
+          recomendacion = "Recomendamos nuestra <b>Hidratación Intensiva con Ácido Hialurónico</b> para devolverle la vida y suavidad a su rostro. 💧";
+        } else if (nombrePiel.toLowerCase().includes("mixta")) {
+          recomendacion = "Recomendamos nuestro <b>Tratamiento Equilibrante</b>, perfecto para cuidar cada zona de su rostro de forma específica. 🌸";
+        } else {
+          recomendacion = "Recomendamos nuestra maravillosa <b>Limpieza Facial Estándar</b> y una evaluación en persona. 🧖‍♀️";
+        }
+
+        if(divResultado) {
+          divResultado.innerHTML = `
+            <h3 style="color: #6a4c9c; margin-bottom: 8px;">Diagnóstico: ${nombrePiel} (${porcentaje}%)</h3>
+            <p style="color: #555; font-size: 1.05em; line-height: 1.4; margin:0;">${recomendacion}</p>
+          `;
+        }
+
+      } catch (error) {
+        console.error("Error al analizar:", error);
+        if(divResultado) divResultado.innerHTML = "Hubo un pequeño error. Intente acercar más su rostro a la cámara. 📸";
+      }
+
+      btnAnalizar.innerText = "✨ Analizar Piel";
+      btnAnalizar.disabled = false;
+    });
+  }
+
+  // =========================================================
+// 🪟 CONTROL DE LA VENTANA FLOTANTE DEL ESCÁNER IA
+// =========================================================
+const btnAbrirEscaner = document.getElementById('btnAbrirEscaner');
+const modalEscanerFlotante = document.getElementById('modalEscanerFlotante');
+const btnCerrarEscaner = document.getElementById('btnCerrarEscaner');
+
+if (btnAbrirEscaner && modalEscanerFlotante && btnCerrarEscaner) {
+  
+  // 1. Al presionar el botón nuevo, se abre la ventana
+  btnAbrirEscaner.addEventListener('click', (e) => {
+    e.preventDefault(); 
+    modalEscanerFlotante.classList.add('activo');
+  });
+
+  // 2. Al presionar la X, se cierra
+  btnCerrarEscaner.addEventListener('click', () => {
+    modalEscanerFlotante.classList.remove('activo');
+    
+    // Detalle VIP: Si la cámara quedó prendida, la apagamos automáticamente por privacidad
+    const btnApagar = document.getElementById('btn-encender');
+    if (btnApagar && btnApagar.innerText.includes("Apagar")) {
+      btnApagar.click(); 
+    }
+  });
+}
+
+}); // 🌟 ¡CIERRE FINAL DEL DOMContentLoaded! 🌟

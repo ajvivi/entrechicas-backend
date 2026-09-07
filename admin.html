@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>aaPanel - Entre Chicas Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- 🌟 MOTOR DE GRÁFICOS PREMIUM (Chart.js) 🌟 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- 🌟 MOTOR DE INTELIGENCIA ARTIFICIAL (TensorFlow) 🌟 -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+  
+  <style>
+    /* =========================================
+       💻 ESTILOS CLON: PANEL DE SERVIDOR
+       ========================================= */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Roboto', sans-serif; background-color: #f0f2f5; display: flex; }
+
+    /* 1. MENÚ LATERAL OSCURO */
+    .sidebar { width: 220px; background-color: #344050; color: #aeb9c2; height: 100vh; position: fixed; display: flex; flex-direction: column; z-index: 100; }
+    .sidebar-header { padding: 15px; background-color: #2b3643; color: white; font-size: 1.1em; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #232d38;}
+    
+    .menu-item { padding: 15px 20px; cursor: pointer; border-left: 3px solid transparent; transition: 0.2s; display: flex; align-items: center; gap: 12px; font-size: 0.9em; }
+    .menu-item:hover { background-color: #2b3643; color: white; }
+    .menu-item.active { background-color: #2b3643; border-left: 3px solid #20a53a; color: white; }
+
+    /* 2. ÁREA PRINCIPAL */
+    .main-content { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar { background-color: white; height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid #e7e7e7; font-size: 0.85em; color: #666; position: sticky; top: 0; z-index: 90;}
+    .topbar-right { color: #20a53a; font-weight: 500; display: flex; gap: 15px; align-items: center; }
+
+    /* 3. TARJETAS BLANCAS (Widgets) */
+    .content-area { padding: 20px; }
+    .card { background-color: white; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .card-header { padding: 15px 20px; font-weight: 500; color: #444; border-bottom: 1px solid #f0f0f0; background-color: #fdfdfd; font-size: 1.1em; }
+    .card-body { padding: 20px; }
+
+    /* Círculos y Tablas */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; text-align: center; }
+    .stat-circle { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #eee; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; font-size: 1.4em; font-weight: bold; color: #333; }
+    .stat-circle.green { border-color: #20a53a; color: #20a53a; }
+    .stat-circle.orange { border-color: #f39c12; color: #f39c12; }
+    .stat-label { font-size: 0.85em; color: #888; margin-bottom: 5px; }
+    .stat-subtext { font-size: 0.75em; color: #bbb; }
+
+    .tabla-reservas { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9em; }
+    .tabla-reservas th { padding: 12px 15px; color: #666; font-weight: 500; border-bottom: 2px solid #eee; background-color: #fcfcfc;}
+    .tabla-reservas td { padding: 15px; border-bottom: 1px solid #eee; color: #444; }
+    .tabla-reservas tr:hover { background-color: #f9f9f9; }
+    
+    /* Clase para la transición de pantallas */
+    .pantalla-modulo { display: none; animation: aparecer 0.3s ease-in-out; }
+    @keyframes aparecer { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA LATERAL OSCURA -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <i class="fa-solid fa-server" style="color: #f39c12;"></i> Entre Chicas
+    </div>
+    <div class="menu-item active" data-target="pantalla-inicio"><i class="fa-solid fa-house"></i> Inicio</div>
+    <div class="menu-item" data-target="pantalla-reservas"><i class="fa-solid fa-calendar-check"></i> Reservas</div>
+    <div class="menu-item" data-target="pantalla-clientas"><i class="fa-solid fa-users"></i> Clientas</div>
+    <div class="menu-item" data-target="pantalla-estadisticas"><i class="fa-solid fa-chart-pie"></i> Estadísticas</div>
+    <div class="menu-item" data-target="pantalla-seguridad"><i class="fa-solid fa-shield-halved"></i> Seguridad</div>
+    <div class="menu-item" data-target="pantalla-configuracion"><i class="fa-solid fa-gear"></i> Configuración</div>
+  </div>
+
+  <!-- ÁREA PRINCIPAL DERECHA -->
+  <div class="main-content">
+    
+    <!-- Barra superior -->
+    <div class="topbar">
+      <div><i class="fa-solid fa-gear"></i> Sistema: Firebase Cloud Firestore &nbsp;&nbsp;&nbsp; Tiempo activo: <span id="tiempo-activo" style="color: #20a53a; font-weight: bold;">00:00:00</span></div>
+      <div class="topbar-right">
+        <span id="btnActualizar" style="cursor: pointer; transition: 0.3s; font-weight: bold;">🔄 Actualizar</span>
+        <span id="btnArreglar" style="transition: 0.3s; padding: 5px 10px; border-radius: 5px; cursor: pointer;">✏️ Arreglar</span>
+        <span id="btnReiniciar" style="color: #e74c3c; cursor: pointer; transition: 0.3s; font-weight: bold;">⚠️ Reiniciar</span>
+      </div>
+    </div>
+
+    <!-- ÁREA DE PANTALLAS (SPA) -->
+    <div class="content-area">
+      
+      <!-- 📌 PANTALLA: INICIO -->
+      <div id="pantalla-inicio" class="pantalla-modulo" style="display: block;">
+        <div class="card" style="background: linear-gradient(135deg, #6a4c9c, #9b59b6); color: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(106, 76, 156, 0.3);">
+          <div class="card-body" style="padding: 35px; display: flex; align-items: center; gap: 25px;">
+            <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 4.5em; opacity: 0.9;"></i>
+            <div>
+              <h2 style="margin-bottom: 8px; font-size: 2.2em; font-weight: 700;">¡Hola, Javier! Bienvenido a su Imperio </h2>
+              <p style="font-size: 1.1em; opacity: 0.9; line-height: 1.5;">El panel de control de <b>Entre Chicas</b> está funcionando al 100% y conectado a Google Cloud. ¿Qué magia haremos hoy por nuestras clientas?</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="color: #444; margin-bottom: 15px; margin-top: 25px; font-weight: 500;"> Acciones Rápidas</h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+          <div class="card btn-atajo" data-destino="pantalla-reservas" style="cursor: pointer; transition: 0.3s; text-align: center; border-bottom: 4px solid #20a53a;">
+            <div class="card-body" style="padding: 30px;">
+              <i class="fa-solid fa-calendar-check" style="font-size: 2.5em; color: #20a53a; margin-bottom: 15px;"></i>
+              <h4 style="color: #555; margin-bottom: 5px;">Gestionar Citas</h4>
+              <p style="color: #888; font-size: 0.85em;">Ir directo a la tabla de hoy</p>
+            </div>
+          </div>
+          <div class="card btn-atajo" data-destino="pantalla-estadisticas" style="cursor: pointer; transition: 0.3s; text-align: center; border-bottom: 4px solid #f39c12;">
+            <div class="card-body" style="padding: 30px;">
+              <i class="fa-solid fa-chart-pie" style="font-size: 2.5em; color: #f39c12; margin-bottom: 15px;"></i>
+              <h4 style="color: #555; margin-bottom: 5px;">Ver Gráficos</h4>
+              <p style="color: #888; font-size: 0.85em;">Analizar el servicio estrella</p>
+            </div>
+          </div>
+          <div class="card btn-atajo" data-destino="pantalla-clientas" style="cursor: pointer; transition: 0.3s; text-align: center; border-bottom: 4px solid #3498db;">
+            <div class="card-body" style="padding: 30px;">
+              <i class="fa-solid fa-users" style="font-size: 2.5em; color: #3498db; margin-bottom: 15px;"></i>
+              <h4 style="color: #555; margin-bottom: 5px;">Escáner Clínico</h4>
+              <p style="color: #888; font-size: 0.85em;">Analizar piel de clientas</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 📌 PANTALLA: RESERVAS -->
+      <div id="pantalla-reservas" class="pantalla-modulo">
+        <div class="card">
+          <div class="card-header">Status de Citas en Tiempo Real</div>
+          <div class="card-body stats-grid">
+            <div><div class="stat-label">Citas para Hoy</div><div class="stat-circle" id="circulo-hoy">0</div><div class="stat-subtext">Agendadas para hoy</div></div>
+            <div><div class="stat-label">Total Pendientes</div><div class="stat-circle" id="circulo-total">0</div><div class="stat-subtext">Por atender en la base</div></div>
+            <div><div class="stat-label">Ocupación Semanal</div><div class="stat-circle green" id="circulo-capacidad">0%</div><div class="stat-subtext">Basado en meta de 20 citas</div></div>
+            <div><div class="stat-label">Estado del Sistema</div><div class="stat-circle orange" id="circulo-estado">100%</div><div class="stat-subtext">Conexión Óptima</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">Panel de Administración de Citas</div>
+          <div class="card-body" style="padding: 0;">
+            <table class="tabla-reservas">
+              <thead><tr><th>ID</th><th>Clienta</th><th>Teléfono</th><th>Servicio</th><th>Fecha</th><th>Hora</th><th>Acción</th></tr></thead>
+              <tbody id="cuerpoTabla"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 📌 PANTALLA: CLIENTAS (IA + Historial) -->
+      <div id="pantalla-clientas" class="pantalla-modulo">
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+          
+          <div style="flex: 1; min-width: 300px;">
+            <div class="card">
+              <div class="card-header">👥 Historial Clínico de Clientas</div>
+              <div class="card-body" style="padding: 0; max-height: 480px; overflow-y: auto;">
+                <table class="tabla-reservas">
+                  <thead><tr><th>Clienta</th><th>Diagnóstico IA</th><th>Fecha</th></tr></thead>
+                  <tbody id="cuerpoDirectorio">
+                    <!-- JavaScript insertará los diagnósticos guardados aquí -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div style="flex: 1; min-width: 300px;">
+            <div class="card">
+              <div class="card-header">🧠 Nuevo Diagnóstico Facial</div>
+              <div class="card-body" style="text-align: center;">
+                <input type="text" id="nombre-clienta-escaner" placeholder="Escriba el nombre de la clienta..." style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em; outline: none;">
+                <div style="width: 100%; height: 230px; background: #2b3643; margin: 0 auto 15px auto; border-radius: 8px; overflow: hidden; position: relative;">
+                  <p id="mensaje-camara-admin" style="color: #aeb9c2; line-height: 230px; margin: 0;"><i class="fa-solid fa-video-slash"></i> Cámara apagada</p>
+                  <video id="video-camara-admin" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; display: none;"></video>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+                  <button id="btn-encender-admin" style="padding: 10px 15px; border: none; border-radius: 5px; background-color: #6a4c9c; color: white; cursor: pointer; font-weight: bold; transition: 0.3s;">📷 Encender</button>
+                  <button id="btn-analizar-admin" disabled style="padding: 10px 15px; border: none; border-radius: 5px; background-color: #ccc; color: white; cursor: not-allowed; font-weight: bold; transition: 0.3s;">✨ Analizar y Guardar</button>
+                </div>
+                <div id="resultado-escaner-admin" style="display: none; padding: 15px; background: #fdfbfa; border-radius: 8px; border-left: 4px solid #6a4c9c; text-align: left;"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 📌 PANTALLA: ESTADÍSTICAS -->
+      <div id="pantalla-estadisticas" class="pantalla-modulo">
+        <div class="card">
+          <div class="card-header">📈 Rendimiento de Servicios (Tiempo Real)</div>
+          <div class="card-body">
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+              <div style="flex: 2; min-width: 300px; padding-right: 20px; border-right: 1px solid #eee;">
+                <canvas id="graficoServicios" height="120"></canvas>
+              </div>
+              <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 15px;">
+                <div style="background: #fdfbfa; padding: 20px; border-radius: 8px; border-left: 4px solid #6a4c9c; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                  <h4 style="color: #555; margin-bottom: 5px;">Servicio Estrella 🌟</h4>
+                  <h2 id="servicio-estrella" style="color: #6a4c9c; font-size: 1.5em;">Calculando...</h2>
+                  <p style="font-size: 0.8em; color: #888; margin-top: 5px;">El más solicitado por las clientas</p>
+                </div>
+                <div style="background: #fdfbfa; padding: 20px; border-radius: 8px; border-left: 4px solid #20a53a; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                  <h4 style="color: #555; margin-bottom: 5px;">Citas Históricas 📅</h4>
+                  <h2 id="total-citas-stats" style="color: #20a53a; font-size: 1.8em;">0</h2>
+                  <p style="font-size: 0.8em; color: #888; margin-top: 5px;">Registradas en el sistema</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 📌 PANTALLA: SEGURIDAD -->
+      <div id="pantalla-seguridad" class="pantalla-modulo">
+        <div class="card">
+          <div class="card-header">🛡️ Protocolos de Acceso</div>
+          <div class="card-body" style="text-align: center; padding: 40px;">
+            <i class="fa-solid fa-lock" style="font-size: 3em; color: #ddd; margin-bottom: 15px;"></i>
+            <h3 style="color: #555;">Máxima Seguridad Activada</h3>
+            <p style="color: #888;">Su base de datos Firestore está protegida por encriptación. 🔒</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 📌 PANTALLA: CONFIGURACIÓN -->
+      <div id="pantalla-configuracion" class="pantalla-modulo">
+        <div class="card">
+          <div class="card-header">⚙️ Ajustes del Sistema</div>
+          <div class="card-body" style="text-align: center; padding: 40px;">
+            <i class="fa-solid fa-sliders" style="font-size: 3em; color: #ddd; margin-bottom: 15px;"></i>
+            <h3 style="color: #555;">Personalización</h3>
+            <p style="color: #888;">Sistema configurado para Firebase Cloud. ☁️</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

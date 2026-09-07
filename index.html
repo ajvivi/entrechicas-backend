@@ -2,23 +2,78 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Entre Chicas - Salón de Belleza</title>
-  <link rel="stylesheet" href="style.css">
-  
+  <link rel="stylesheet" href="style.css?v=2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet">
+  <!-- 🌟 CONEXIÓN A LA APP MÓVIL (PWA) 🌟 -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6a4c9c">
+
+
+  <!-- 🌟 LIBRERÍAS DE INTELIGENCIA ARTIFICIAL DE GOOGLE 🌟 -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+  <style>
+    /* =========================================
+       ✨ ESTILOS DEL BOTÓN Y LA VENTANA FLOTANTE
+       ========================================= */
+    .btn-analisis-piel {
+      margin-top: 20px; 
+      display: inline-flex; align-items: center; gap: 12px;
+      background-color: rgba(255, 255, 255, 0.7); 
+      backdrop-filter: blur(5px); color: #333;
+      padding: 12px 25px; border-radius: 50px;
+      border: 2px solid #6a4c9c; cursor: pointer;
+      transition: all 0.3s ease; text-decoration: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: fit-content;
+    }
+    .btn-analisis-piel:hover {
+      background-color: #6a4c9c; color: white;
+      box-shadow: 0 8px 20px rgba(106, 76, 156, 0.4); transform: translateY(-3px); 
+    }
+    .btn-analisis-piel:hover small { color: #e0d4f5; }
+    .btn-analisis-piel small { display: block; font-size: 0.8em; font-weight: normal; color: #666; transition: all 0.3s ease; }
+
+    /* El Fondo Borroso */
+    .modal-escaner-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+      z-index: 9999; display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+    }
+    .modal-escaner-overlay.activo { opacity: 1; pointer-events: auto; }
+    
+    /* La Ventana Central */
+    .modal-escaner-contenido {
+      width: 90%; max-width: 650px; position: relative;
+      transform: translateY(40px) scale(0.95); transition: transform 0.4s ease;
+    }
+    .modal-escaner-overlay.activo .modal-escaner-contenido { transform: translateY(0) scale(1); }
+    
+    /* Botón X de cerrar */
+    .btn-cerrar-modal {
+      position: absolute; top: -30px; right: 0; background: none; border: none; 
+      font-size: 2.5em; color: #6a4c9c; cursor: pointer; transition: 0.3s;
+    }
+    .btn-cerrar-modal:hover { color: #e74c3c; transform: scale(1.2); }
+  </style>
 </head>
 <body>
+  
+  <!-- 🔒 PASADIZO SECRETO AL PANEL VIP 🔒 -->
+  <a href="admin.html" style="opacity: 0.15; text-decoration: none; cursor: default; margin-left: 10px; font-size: 14px; vertical-align: middle; position: absolute; z-index: 100;" title="Centro de Control">🔒</a>
 
   <video id="videoFondo" class="video-fondo-pantalla" autoplay loop muted playsinline>
     <source src="video.mp4" type="video/mp4">
   </video>
   
-  
   <div class="pantalla-fondo">
-    
     <main class="tarjeta-principal" id="contenedorInteractiva">
       
       <nav class="navegacion">
@@ -26,110 +81,82 @@
         <ul class="enlaces">
           <li><a href="#servicios">Servicios</a></li>
           <li><a href="#nosotros">Nosotros</a></li>
-          <li><a href="#">Testimonios</a></li>
+          <li><a href="#">ayuda</a></li>
         </ul>
-        
         <a href="#" id="btnAbrirModal" class="btn-reserva" style="text-decoration: none;">Agendar Cita</a>
       </nav>
 
       <div class="contenido-hero">
-        
         <div class="texto-izquierdo">
           <h1 class="titulo-elegante">Despierta tu<br>belleza natural</h1>
           <p>En <b>Entre Chicas</b> te ofrecemos una experiencia integral para tu cuidado personal. Déjate mimar por nuestras expertas.</p>
           <a href="#servicios" class="btn-accion" style="text-decoration: none; display: inline-block;">Ver Catálogo</a>
+          
+          <!-- 🌟 BOTÓN MÁGICO QUE ABRE EL ESCÁNER FLOTANTE 🌟 -->
+          <a href="#" id="btnAbrirEscaner" class="btn-analisis-piel">
+            <span style="font-size: 1.8em;"></span>
+            <span style="text-align: left; line-height: 1.3;">
+              <strong style="font-size: 1.05em;">¿Conoces tu tipo de piel?</strong><br>
+              <small>Presiona aquí para analizar tu piel</small>
+            </span>
+          </a>
         </div>
 
         <div class="centro-imagen"></div>
 
         <div class="datos-derechos">
-          <div class="dato">
-            <h3>100%</h3>
-            <p>Atención personalizada</p>
-          </div>
-          <div class="dato">
-            <h3>+50</h3>
-            <p>Servicios de belleza</p>
-          </div>
-          <div class="dato">
-            <h3>Premium</h3>
-            <p>Productos de alta calidad</p>
-          </div>
+          <div class="dato"><h3>100%</h3><p>Atención personalizada</p></div>
+          <div class="dato"><h3>+50</h3><p>Servicios de belleza</p></div>
+          <div class="dato"><h3>Premium</h3><p>Productos de alta calidad</p></div>
         </div>
       </div>
       
       <button id="btnAudio" class="btn-sonido">Activar Sonido</button>
-
     </main> 
-  </div> <section id="servicios" class="seccion-servicios">
+  </div> 
+
+  <!-- ==========================================
+       🌸 SECCIÓN DE SERVICIOS
+       ========================================== -->
+  <section id="servicios" class="seccion-servicios">
     <div class="tarjeta-servicios-grande">
-  
       <div class="lado-foto">
         <img src="foto1.png" alt="Tratamiento Skincare" class="foto-skincare">
       </div>
-  
       <div class="lado-contenido">
         <h2 class="titulo-dentro-tarjeta titulo-elegante">Nuestros Servicios</h2>
-        <p>No prometemos perfección, prometemos cuidado consciente. Descubre nuestros tratamientos personalizados para
-          resaltar la luz natural de tu piel, combinando tecnología y masajes relajantes.</p>
-  
+        <p>No prometemos perfección, prometemos cuidado consciente. Descubre nuestros tratamientos personalizados para resaltar la luz natural de tu piel, combinando tecnología y masajes relajantes.</p>
         <ul class="lista-servicios-elegante">
-            <li>
-              <b>Manicure</b> Esmaltado tradicional y soft gel.
-              <span class="precio-tag">Precio: $18.000</span>
-            </li>
-            <li>
-              <b>Pedicure</b> Esmaltado permanente y tradicional.
-              <span class="precio-tag">Precio: $22.000</span>
-            </li>
-            <li>
-              <b>Peluquería</b> Cortes, tinturas, alisado, extensiones y peinados.
-              <span class="precio-tag">Precio: $35.000</span>
-            </li>
-            <li>
-              <b>Depilación</b> Cuerpo completo o zona a elección.
-              <span class="precio-tag">Precio: $25.000</span>
-            </li>
-            <li>
-              <b>Faciales</b> Limpieza, hidratación y extracción de puntos.
-              <span class="precio-tag">Precio: $40.000</span>
-            </li>
-            <li>
-              <b>Cosméticos</b> Venta de productos premium.
-              <span class="precio-tag">Precio: $30.000</span>
-            </li>
-            <li>
-              <b>Pestañas</b> Ondulación y extensión.
-              <span class="precio-tag">Precio: $28.000</span>
-            </li>
-            <li>
-              <b>Cejas</b> Perfilado profesional.
-              <span class="precio-tag">Precio: $12.000</span>
-            </li>
-          </ul>
-  
+          <li><b>Manicure</b> Esmaltado tradicional y soft gel. <span class="precio-tag">Precio: $18.000</span></li>
+          <li><b>Pedicure</b> Esmaltado permanente y tradicional. <span class="precio-tag">Precio: $22.000</span></li>
+          <li><b>Peluquería</b> Cortes, tinturas, alisado, extensiones y peinados. <span class="precio-tag">Precio: $35.000</span></li>
+          <li><b>Depilación</b> Cuerpo completo o zona a elección. <span class="precio-tag">Precio: $25.000</span></li>
+          <li><b>Faciales</b> Limpieza, hidratación y extracción de puntos. <span class="precio-tag">Precio: $40.000</span></li>
+          <li><b>Cosméticos</b> Venta de productos premium. <span class="precio-tag">Precio: $30.000</span></li>
+          <li><b>Pestañas</b> Ondulación y extensión. <span class="precio-tag">Precio: $28.000</span></li>
+          <li><b>Cejas</b> Perfilado profesional. <span class="precio-tag">Precio: $12.000</span></li>
+        </ul>
       </div>
     </div>
   </section>
 
+  <!-- ==========================================
+       🌸 SECCIÓN NOSOTROS
+       ========================================== -->
   <section id="nosotros" class="seccion-nosotros">
     <div class="tarjeta-servicios-grande tarjeta-nosotros-grande">
-      
       <div class="lado-foto">
-        <img src="trabajadores.jpeg" alt="Detalle Macro Pestañas Entre Chicas Chillán" class="foto-skincare">
+        <img src="trabajadores.jpeg" alt="Equipo Entre Chicas" class="foto-skincare">
       </div>
-      
       <div class="lado-contenido">
         <h2 class="titulo-dentro-tarjeta titulo-elegante">Sobre Nosotros</h2>
         <p>En <strong>Entre Chicas</strong> somos un equipo apasionado por resaltar tu luz natural. Nuestro objetivo es brindarte un espacio seguro, relajante y exclusivo donde puedas desconectarte del mundo y dejarte mimar.</p>
-        
         <h3 class="subtitulo-seccion"> Nuestro Equipo</h3>
         <ul class="lista-texto-simple">
           <li><b>Javier Palma</b> - Fundador y Administrador</li>
           <li><b>Camila Valdés</b> - Estilista Principal</li>
           <li><b>Valentina Soto</b> - Especialista en Skincare</li>
         </ul>
-
         <h3 class="subtitulo-seccion">Encuéntranos</h3>
         <ul class="lista-texto-simple">
           <li><b>Ubicación:</b> Centro de Chillán, Región de Ñuble, Chile (Región de Ñuble)</li>
@@ -141,33 +168,22 @@
     </div>
   </section>
 
+  <!-- ==========================================
+       📝 MODAL DE RESERVAS ORIGINAL
+       ========================================== -->
   <div id="modalReservas" class="modal-overlay">
     <div class="modal-contenido">
-      
       <span class="cerrar-modal" id="btnCerrarModal">&times;</span>
-      
       <div class="contenedor-formulario">
         <h2 class="titulo-seccion titulo-elegante">Agendar mi Cita</h2>
-        
         <form id="formularioReserva">
-          <div class="grupo-input">
-            <label for="nombre">Nombre completo</label>
-            <input type="text" id="nombre" required placeholder="Ej: Camila Pérez">
-          </div>
-          
-          <div class="grupo-input">
-            <label for="correo">Correo electrónico</label>
-            <input type="email" id="correo" required placeholder="tu@correo.com">
-          </div>
-          
-          <div class="grupo-input">
-            <label for="telefono">Teléfono / WhatsApp</label>
-            <input type="tel" id="telefono" required placeholder="+56 9...">
-          </div>
+          <div class="grupo-input"><label for="nombre">Nombre completo</label><input type="text" id="nombre" required placeholder="Ej: Camila Pérez"></div>
+          <div class="grupo-input"><label for="correo">Correo electrónico</label><input type="email" id="correo" required placeholder="tu@correo.com"></div>
+          <div class="grupo-input"><label for="telefono">Teléfono / WhatsApp</label><input type="tel" id="telefono" required placeholder="+56 9..."></div>
           
           <div class="grupo-input">
             <label for="servicioSelect">Selecciona tu servicio</label>
-            <select id="servicio" name="servicio" required class="su-clase-de-estilos-si-tiene-alguna">
+            <select id="servicio" name="servicio" required>
               <option value="" disabled selected>Selecciona tu servicio hermoso...</option>
               <option value="Manicure y Pedicure">Manicure y Pedicure</option>
               <option value="Peluquería y Peinados">Peluquería y Peinados</option>
@@ -177,26 +193,64 @@
               <option value="Diseño de Cejas">Diseño de Cejas</option>
               <option value="Maquillaje Profesional">Maquillaje Profesional</option>
             </select>
+          </div> 
           
           <div class="fila-inputs">
-            <div class="grupo-input">
-              <label for="fecha">Fecha</label>
-              <input type="date" id="fecha" required>
-            </div>
-            <div class="grupo-input">
-              <label for="hora">Hora</label>
-              <input type="time" id="hora" required>
-            </div>
+            <div class="grupo-input"><label for="fecha">Fecha</label><input type="date" id="fecha" required></div>
+            <div class="grupo-input"><label for="hora">Hora</label><input type="time" id="hora" required></div>
           </div>
           
           <button type="submit" class="btn-reserva-form">Confirmar Reserva</button>
           <p class="texto-privacidad">Su información, protegida por ley.</p>
         </form>
       </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       🧠 NUEVA VENTANA FLOTANTE DEL ESCÁNER IA 
+       ========================================== -->
+  <div id="modalEscanerFlotante" class="modal-escaner-overlay">
+    <div class="modal-escaner-contenido">
+      
+      <!-- Botón X para cerrar -->
+      <button id="btnCerrarEscaner" class="btn-cerrar-modal">&times;</button>
+      
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #6a4c9c; font-family: serif; font-size: 2.2em; margin-bottom: 5px;">Analizador de Piel Inteligente</h2>
+        <p style="color: #888; font-size: 1.1em;">Descubra su tratamiento ideal escaneando su rostro.</p>
+      </div>
+
+      <div style="background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+        
+        <!-- Pantalla de la Cámara con efecto espejo (scaleX) -->
+        <div style="width: 100%; height: 350px; background: #1f1f1f; border-radius: 12px; margin-bottom: 25px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+          <p id="mensaje-camara" style="color: #ccc; font-size: 1.1em; margin: 0;">La cámara está apagada</p>
+          <video id="video-camara" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: none;"></video>
+        </div>
+
+        <div style="display: flex; gap: 15px; justify-content: center;">
+          <button id="btn-encender" style="background-color: #6a4c9c; color: white; border: none; padding: 12px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: 0.3s;">Encender Cámara</button>
+          <button id="btn-analizar" disabled style="background-color: #e0e0e0; color: #999; border: none; padding: 12px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1em; cursor: not-allowed; transition: 0.3s;">Analizar Piel</button>
+        </div>
+
+        <div id="resultado-escaner" style="display: none; margin-top: 20px; padding: 15px; border-radius: 10px; text-align: center; background-color: #f8f5ff; color: #6a4c9c; font-weight: 500;"></div>
+      </div>
       
     </div>
   </div>
-  
+
+  <!-- 🌟 SU MOTOR LÓGICO DE JAVASCRIPT 🌟 -->
   <script type="module" src="script.js"></script>
+  <script>
+  // Arrancar el motor de la App Móvil
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(registro => console.log('¡La App PWA está lista y funcionando! 📱✨', registro.scope))
+        .catch(error => console.log('Hubo un error con la App 🥺', error));
+    });
+  }
+</script>
 </body>
 </html>

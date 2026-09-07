@@ -1,0 +1,22 @@
+{
+  "id": "/",
+  "name": "Entre Chicas Salón",
+  "short_name": "Entre Chicas",
+  "description": "Tu salón de belleza, cuidado personal e Inteligencia Artificial",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fdfbfa",
+  "theme_color": "#6a4c9c",
+  "icons": [
+    {
+      "src": "icono-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icono-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
